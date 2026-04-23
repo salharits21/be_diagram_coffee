@@ -33,8 +33,9 @@ Ikuti langkah-langkah berikut untuk menjalankan aplikasi di mesin lokal kamu:
 3. **Setup Environment Variables**
    ```bash
    cp .env.example .env
-
-   ```
+    ```
+   Cuplikan .env
+   ```bash
    DB_CONNECTION=mysql
    DB_HOST=127.0.0.1
    DB_PORT=3306
