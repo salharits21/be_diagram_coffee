@@ -37,41 +37,33 @@ class AuthController extends Controller
     // Fitur Login
     public function login(LoginRequest $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (Auth::attempt($request->only('email', 'password'))) {
+            $request->session()->regenerate(); // Mencegah Session Fixation
+
             return response()->json([
-                'success' => false,
-                'message' => 'Email atau password salah',
-                'data' => null
-            ], 401);
+                'success' => true,
+                'message' => 'Login berhasil',
+                'data' => Auth::user()
+            ], 200);
         }
 
-        $user = User::where('email', $request->email)->firstOrFail();
-        
-        // $user->tokens()->delete(); 
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'success' => true,
-            'message' => 'Login berhasil',
-            'data' => [
-                'user' => $user,
-                'access_token' => $token,
-                'token_type' => 'Bearer'
-            ]
-        ], 200);
+            'success' => false,
+            'message' => 'Email atau password salah'
+        ], 401);
     }
 
     // Fitur Logout
     public function logout(Request $request)
     {
-        // Menghapus token yang sedang digunakan untuk request ini
-        $request->user()->currentAccessToken()->delete();
+        Auth::guard('web')->logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return response()->json([
             'success' => true,
-            'message' => 'Logout berhasil',
-            'data' => null
+            'message' => 'Logout berhasil'
         ], 200);
     }
 }
