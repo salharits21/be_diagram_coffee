@@ -13,11 +13,12 @@ class UpdateMenuItemRequest extends FormRequest
 
     public function rules(): array
     {
+        $menuItem = $this->route('menuItem');
         return [
             'category_id' => ['sometimes', 'exists:categories,id'],
-            'name' => ['sometimes', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:100', Rule::unique('menu_items','name')->whereNull('deleted_at')->ignore($menuItem->id)],
             'description' => ['nullable', 'string'],
-            'base_price' => ['sometimes', 'numeric', 'min:0'],
+            'base_price' => ['sometimes', 'numeric', 'min:1'],
             'image_url' => ['nullable', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
         ];

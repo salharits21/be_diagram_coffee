@@ -76,6 +76,7 @@ class CategoryController extends Controller
     public function update(UpdateCategoryRequest $request, Category $category)
     {
         $data = $request->validated();
+        $oldSortOrder = $category->sort_order;
 
         // Regenerate slug jika nama berubah
         if (isset($data['name'])) {
@@ -86,6 +87,16 @@ class CategoryController extends Controller
                 $slug = $originalSlug . '-' . $counter++;
             }
             $data['slug'] = $slug;
+        }
+
+        if (isset($data['sort_order'])) {
+            $existingCategory = Category::where('sort_order', $data['sort_order'])->where('id', '!=', $category->id)->first();
+            if($existingCategory){
+                $existingCategory->update([
+                    'sort_order' => $oldSortOrder
+                ]);
+            }
+            $data['sort_order'] = $data['sort_order'];
         }
 
         $category->update($data);

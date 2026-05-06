@@ -15,9 +15,9 @@ class StoreMenuItemRequest extends FormRequest
     {
         return [
             'category_id' => ['required', 'exists:categories,id'],
-            'name' => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:100', Rule::unique('menu_items','name')->whereNull('deleted_at')],
             'description' => ['nullable', 'string'],
-            'base_price' => ['required', 'numeric', 'min:0'],
+            'base_price' => ['required', 'numeric', 'min:1'],
             'image_url' => ['nullable', 'string', 'max:255'],
             'is_active' => ['sometimes', 'boolean'],
         ];

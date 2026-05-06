@@ -13,10 +13,20 @@ class UpdateCategoryRequest extends FormRequest
 
     public function rules(): array
     {
+        $categoryId = $this->route('category')->id;
         return [
-            'name' => ['sometimes', 'string', 'max:255'],
+            'name' => ['sometimes', 'string', 'max:100', Rule::unique('categories','name')->ignore($categoryId)->whereNull('deleted_at')],
             'description' => ['nullable', 'string'],
-            'sort_order' => ['sometimes', 'integer', 'min:0'],
+            'sort_order' => ['sometimes', 'integer', 'min:1'],
         ];
     }
+
+    // public function messages(): array
+    // {
+    //     return [
+    //         'sort_order.min' => 'Posisi kategori harus lebih besar dari 0',
+    //         'name.max' => 'Nama kategori maksimal 100 karakter',
+    //         'name.unique' => 'Nama kategori sudah ada'
+    //     ];
+    // }
 }
