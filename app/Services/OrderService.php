@@ -28,9 +28,9 @@ class OrderService
      * @param string|null $notes
      * @return Order
      */
-    public function createOrder(User $user, int $branchId, array $items, string $paymentMethod, ?string $notes = null): Order
+    public function createOrder(?User $user, int $branchId, array $items, string $paymentMethod, ?string $notes = null, string $guestName = null): Order
     {
-        return DB::transaction(function () use ($user, $branchId, $items, $paymentMethod, $notes) {
+        return DB::transaction(function () use ($user, $branchId, $items, $paymentMethod, $notes, $guestName) {
             $subtotal = '0.00';
             $discountTotal = '0.00';
             $orderItems = [];
@@ -83,10 +83,11 @@ class OrderService
             $totalAmount = bcsub($subtotal, $discountTotal, 2);
 
             // Hitung loyalty points: 1 poin per Rp 10.000
-            $loyaltyPoints = (int) bcdiv($totalAmount, '10000', 0);
+            $loyaltyPoints = $user ? (int) bcdiv($totalAmount, '10000', 0) : 0;
 
             $order = Order::create([
-                'user_id' => $user->id,
+                'user_id' => $user?->id,
+                'guest_name' => $guestName ?? null,
                 'branch_id' => $branchId,
                 'order_number' => Order::generateOrderNumber(),
                 'status' => 'pending',
@@ -105,7 +106,10 @@ class OrderService
 
             // Jika bayar via Xendit, buat invoice
             if ($paymentMethod === 'xendit') {
-                $order->load('items', 'user');
+                $order->load('items');
+                if ($user) {
+                    $order->load('user');
+                }
                 try {
                     $invoice = $this->xenditService->createInvoice($order);
                     $order->update([
@@ -113,6 +117,17 @@ class OrderService
                         'xendit_invoice_url' => $invoice['invoice_url'],
                     ]);
                 } catch (\Exception $e) {
+                    $errorMessage = $e->getMessage();
+                    if (method_exists($e, 'getResponseBody')) {
+                        $responseBody = $e->getResponseBody();
+                        if (is_string($responseBody)) {
+                            $decoded = json_decode($responseBody, true);
+                            if (isset($decoded['message'])) {
+                                $errorMessage = $decoded['message'];
+                            }
+                        }
+                    }
+                    
                     // Rollback stok jika gagal buat invoice
                     throw ValidationException::withMessages([
                         'payment' => ['Gagal membuat invoice pembayaran: ' . $e->getMessage()],
@@ -150,7 +165,9 @@ class OrderService
         ]);
 
         // Tambah loyalty points
-        $order->user->increment('loyalty_points', $order->loyalty_points_earned);
+        if ($order->user_id) {
+            $order->user->increment('loyalty_points', $order->loyalty_points_earned);
+        }
 
         return $order->fresh(['items', 'user', 'branch']);
     }
@@ -198,7 +215,9 @@ class OrderService
         ]);
 
         // Tambah loyalty points
-        $order->user->increment('loyalty_points', $order->loyalty_points_earned);
+        if ($order->user_id) {
+            $order->user->increment('loyalty_points', $order->loyalty_points_earned);
+        }
     }
 
     /**

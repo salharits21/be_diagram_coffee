@@ -7,6 +7,7 @@ use App\Http\Requests\MenuItem\StoreMenuItemRequest;
 use App\Http\Requests\MenuItem\UpdateMenuItemRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class MenuItemController extends Controller
 {
@@ -108,7 +109,6 @@ class MenuItemController extends Controller
             $data['slug'] = $originalSlug . '-' . $counter++;
         }
 
-        $data['image_url'] = $request->file('image_url')->store('menu-images');
         $data['image_url'] = Storage::disk('public')->put('menu-images', $request->file('image_url'));
 
         $menuItem = MenuItem::create($data);

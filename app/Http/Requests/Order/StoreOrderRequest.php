@@ -13,7 +13,7 @@ class StoreOrderRequest extends FormRequest
 
     public function rules(): array
     {
-        return [
+        $rules = [
             'branch_id' => ['required', 'exists:branches,id'],
             'payment_method' => ['required', 'in:xendit,cash'],
             'notes' => ['nullable', 'string', 'max:500'],
@@ -22,6 +22,12 @@ class StoreOrderRequest extends FormRequest
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:100'],
             'items.*.notes' => ['nullable', 'string', 'max:255'],
         ];
+
+        if (!auth()->check()) {
+            $rules['guest_name'] = ['required', 'string', 'max:255'];
+        }
+
+        return $rules;
     }
 
     public function messages(): array

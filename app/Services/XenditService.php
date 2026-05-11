@@ -24,26 +24,38 @@ class XenditService
      */
     public function createInvoice(Order $order): array
     {
-        $request = new CreateInvoiceRequest([
+        $payload = [
             'external_id' => $order->order_number,
             'amount' => (float) $order->total_amount,
             'currency' => 'IDR',
             'description' => "Pembayaran pesanan {$order->order_number}",
             'payment_methods' => ['QRIS', 'OVO', 'DANA', 'SHOPEEPAY', 'LINKAJA'],
             'invoice_duration' => 86400, // 24 jam
-            'customer' => [
-                'given_names' => $order->user->name,
-                'email' => $order->user->email,
-            ],
             'items' => $order->items->map(fn ($item) => [
                 'name' => $item->menu_item_name,
                 'quantity' => $item->quantity,
                 'price' => (float) $item->unit_price,
             ])->toArray(),
-            'success_redirect_url' => config('app.frontend_url', 'http://localhost:3000') . '/orders/' . $order->id . '?status=success',
-            'failure_redirect_url' => config('app.frontend_url', 'http://localhost:3000') . '/orders/' . $order->id . '?status=failed',
-        ]);
+            'success_redirect_url' => config('app.frontend_url', 'http://localhost:5173') . '/orders/' . $order->order_number . '?status=success',
+            'failure_redirect_url' => config('app.frontend_url', 'http://localhost:5173') . '/orders/' . $order->order_number . '?status=failed',
+        ];
 
+        if ($order->user_id) {
+            // Jika user login
+            $payload['customer'] = [
+                'given_names' => $order->user->name,
+                'email' => $order->user->email,
+            ];
+        } else if ($order->guest_name) {
+            // Jika guest, kirim nama saja
+            $customerData = [
+                'given_names' => $order->guest_name,
+            ];
+
+            $payload['customer'] = $customerData;
+        }
+
+        $request = new CreateInvoiceRequest($payload);
         $result = $this->invoiceApi->createInvoice($request);
 
         return [

@@ -26,6 +26,8 @@ Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/menu-items', [MenuItemController::class, 'index']);
 Route::get('/menu-items/{menuItem}', [MenuItemController::class, 'show']);
 Route::get('/branches/{branch}/menu', [MenuItemController::class, 'byBranch']);
+Route::post('/orders', [OrderController::class, 'store']);
+Route::get('/orders/status/{orderNumber}', [OrderController::class, 'guestStatus']);
 
 // Xendit Webhook (public, tapi diverifikasi oleh token)
 Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle']);
@@ -46,7 +48,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // ==========================================
     // Customer Order Routes
     // ==========================================
-    Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel']);

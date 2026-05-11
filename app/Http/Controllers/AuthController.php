@@ -21,16 +21,21 @@ class AuthController extends Controller
             'role' => 'customer', // Default role untuk registrasi publik
         ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        // $token = $user->createToken('auth_token')->plainTextToken;
+
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Registrasi berhasil',
+        //     'data' => [
+        //         'user' => $user,
+        //         'access_token' => $token,
+        //         'token_type' => 'Bearer'
+        //     ]
+        // ], 201);
 
         return response()->json([
             'success' => true,
-            'message' => 'Registrasi berhasil',
-            'data' => [
-                'user' => $user,
-                'access_token' => $token,
-                'token_type' => 'Bearer'
-            ]
+            'message' => 'Registrasi berhasil'
         ], 201);
     }
 

@@ -23,15 +23,23 @@ class OrderController extends Controller
     {
         $data = $request->validated();
 
+        $user = $request->user();
+        $guestName = $data['guest_name'] ?? null;
+
         $order = $this->orderService->createOrder(
-            user: $request->user(),
+            user: $user,
+            guestName: $guestName,
             branchId: $data['branch_id'],
             items: $data['items'],
             paymentMethod: $data['payment_method'],
             notes: $data['notes'] ?? null,
         );
-
-        $order->load('items', 'branch');
+        
+        if ($user) {
+            $order->load('items', 'branch', 'user');
+        } else {
+            $order->load('items', 'branch');
+        }
 
         return response()->json([
             'success' => true,
@@ -71,6 +79,21 @@ class OrderController extends Controller
             'success' => true,
             'message' => 'Detail pesanan berhasil diambil',
             'data' => $order,
+        ]);
+    }
+
+    /**
+     * Cek status pesanan (public).
+     */
+    public function guestStatus(string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)
+            ->with(['items', 'branch'])
+            ->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'data' => $order
         ]);
     }
 
