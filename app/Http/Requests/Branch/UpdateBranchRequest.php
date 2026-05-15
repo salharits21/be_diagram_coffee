@@ -13,7 +13,7 @@ class UpdateBranchRequest extends FormRequest
 
     public function rules(): array
     {
-        $branchId = $this->route('branch');
+        $branchId = $this->route('branch')->id;
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'address' => ['sometimes', 'string'],

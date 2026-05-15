@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\XenditWebhookController;
+use App\Http\Controllers\BranchMenuController;
 
 // Public Routes (Tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
@@ -25,7 +26,8 @@ Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/categories/{category}', [CategoryController::class, 'show']);
 Route::get('/menu-items', [MenuItemController::class, 'index']);
 Route::get('/menu-items/{menuItem}', [MenuItemController::class, 'show']);
-Route::get('/branches/{branch}/menu', [MenuItemController::class, 'byBranch']);
+Route::get('/branches/{branch}/menus', [BranchMenuController::class, 'index']);
+Route::get('/branches/{branch}/menus/{menuItem}', [BranchMenuController::class, 'show']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::get('/orders/status/{orderNumber}', [OrderController::class, 'guestStatus']);
 

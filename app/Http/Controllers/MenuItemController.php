@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MenuItem;
+use App\Models\MenuItemBranch;
 use App\Http\Requests\MenuItem\StoreMenuItemRequest;
 use App\Http\Requests\MenuItem\UpdateMenuItemRequest;
 use Illuminate\Http\Request;
@@ -83,6 +84,18 @@ class MenuItemController extends Controller
                 $menuItem->setAttribute('discount_type', $pivot->discount_type);
                 $menuItem->setAttribute('discount_percentage', $pivot->discount_percentage);
                 $menuItem->setAttribute('discount_amount', $pivot->discount_amount);
+                $basePrice = $menuItem->base_price;
+                $finalPrice = $basePrice;
+
+                if ($pivot->is_promo_active && $pivot->discount_type) {
+                    if ($pivot->discount_type === 'percentage') {
+                        $finalPrice = $basePrice - ($basePrice * ($pivot->discount_percentage / 100));
+                    } elseif ($pivot->discount_type === 'fixed') {
+                        $finalPrice = $basePrice - $pivot->discount_amount;
+                    }
+                }
+                
+                $menuItem->setAttribute('final_price', max(0, $finalPrice));
             }
         });
 
