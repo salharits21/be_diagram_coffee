@@ -136,3 +136,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/orders/{order}/confirm-cash', [AdminOrderController::class, 'confirmCash']);
     });
 });
+
+// ==========================================
+// Recommendation API
+// ==========================================
+Route::get('/recommendations', [\App\Http\Controllers\RecommendationController::class, 'index']);
+
+// ==========================================
+// Internal API Routes (For Python ML)
+// ==========================================
+Route::middleware('internal_api')->group(function () {
+    Route::get('/internal/transactions', \App\Http\Controllers\Internal\TransactionExportController::class);
+});

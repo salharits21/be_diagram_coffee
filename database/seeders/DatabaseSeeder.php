@@ -262,5 +262,10 @@ class DatabaseSeeder extends Seeder
                 MenuItemBranch::create($data);
             }
         }
+
+        $this->call([
+            VoucherSeeder::class,
+            OrderSeeder::class,
+        ]);
     }
 }

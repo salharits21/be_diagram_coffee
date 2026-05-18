@@ -125,7 +125,7 @@ class OrderService
             $adminFee = '2000.00'; // Biaya admin 2000
             $totalAmount = bcadd($amountAfterItemDiscount, $adminFee, 2);
 
-            // Hitung loyalty points: 1 poin per Rp 10.000 dari total bayar (termasuk admin_fee atau tidak? Biasanya total bayar)
+            // Hitung loyalty points: 1 poin per Rp 10.000 dari total bayar
             $loyaltyPoints = $user ? (int) bcdiv($totalAmount, '10000', 0) : 0;
 
             // Jika take_away, table_number null
@@ -146,13 +146,11 @@ class OrderService
                 'subtotal' => $subtotal,
                 'discount_total' => $discountTotal,
                 'admin_fee' => $adminFee,
-                'voucher_id' => $voucherId, // Menyimpan ID Voucher-nya (bukan user_voucher) agar jika dihapus riwayat tetap ada (nullable/constrained)
+                'voucher_id' => $voucherId,
                 'total_amount' => $totalAmount,
                 'loyalty_points_earned' => $loyaltyPoints,
                 'notes' => $notes,
             ]);
-
-            // property sementara dihapus karena tidak dibutuhkan dan menyebabkan error save()
 
             foreach ($orderItems as $orderItem) {
                 $order->items()->create($orderItem);

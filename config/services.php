@@ -40,4 +40,12 @@ return [
         'webhook_secret' => env('XENDIT_WEBHOOK_SECRET'),
     ],
 
+    'recommendation' => [
+        'base_url' => env('RECOMMENDATION_API_URL', 'http://localhost:5000'),
+    ],
+
+    'internal' => [
+        'api_key' => env('INTERNAL_API_KEY', 'secret_key_123'),
+    ],
+
 ];
