@@ -200,14 +200,116 @@ describe('Customer Create Order', function () {
             ->assertJsonValidationErrors(['branch_id']);
     });
 
-    test('unauthenticated user cannot create order', function () {
+    test('guest without guest_name gets validation error', function () {
         $response = $this->postJson('/api/orders', [
             'branch_id' => $this->branch->id,
             'payment_method' => 'cash',
             'items' => [['menu_item_id' => $this->menu1->id, 'quantity' => 1]],
         ]);
 
-        $response->assertUnauthorized();
+        $response->assertUnprocessable()
+            ->assertJsonValidationErrors(['guest_name']);
+    });
+});
+
+// ==========================================
+// Guest Ordering (Tanpa Login)
+// ==========================================
+
+describe('Guest Ordering', function () {
+    test('guest can create cash order with guest_name', function () {
+        $response = $this->postJson('/api/orders', [
+            'branch_id' => $this->branch->id,
+            'payment_method' => 'cash',
+            'guest_name' => 'Tamu Budi',
+            'items' => [
+                ['menu_item_id' => $this->menu1->id, 'quantity' => 2],
+                ['menu_item_id' => $this->menu2->id, 'quantity' => 1],
+            ],
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.guest_name', 'Tamu Budi')
+            ->assertJsonPath('data.payment_method', 'cash')
+            ->assertJsonPath('data.status', 'pending');
+
+        // user_id harus null
+        $order = Order::first();
+        expect($order->user_id)->toBeNull()
+            ->and($order->guest_name)->toBe('Tamu Budi')
+            ->and($order->total_amount)->toBe('85000.00');
+    });
+
+    test('guest can create xendit order', function () {
+        mockXenditService();
+
+        $response = $this->postJson('/api/orders', [
+            'branch_id' => $this->branch->id,
+            'payment_method' => 'xendit',
+            'guest_name' => 'Tamu Ani',
+            'items' => [
+                ['menu_item_id' => $this->menu1->id, 'quantity' => 1],
+            ],
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.payment_method', 'xendit')
+            ->assertJsonPath('data.guest_name', 'Tamu Ani')
+            ->assertJsonPath('data.xendit_invoice_id', 'inv_test_123');
+    });
+
+    test('guest does not earn loyalty points', function () {
+        $this->postJson('/api/orders', [
+            'branch_id' => $this->branch->id,
+            'payment_method' => 'cash',
+            'guest_name' => 'Tamu No Points',
+            'items' => [
+                ['menu_item_id' => $this->menu1->id, 'quantity' => 4],
+            ],
+        ]);
+
+        $order = Order::first();
+        // 25000*4 = 100000 → 10 poin, tapi guest = 0
+        expect($order->loyalty_points_earned)->toBe(0);
+    });
+
+    test('guest can check order status by order number', function () {
+        $order = Order::factory()->create([
+            'branch_id' => $this->branch->id,
+            'user_id' => null,
+            'guest_name' => 'Tamu Check',
+        ]);
+
+        $response = $this->getJson("/api/orders/status/{$order->order_number}");
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.order_number', $order->order_number);
+    });
+
+    test('guest status check returns 404 for invalid order number', function () {
+        $response = $this->getJson('/api/orders/status/ORD-INVALID-99999');
+
+        $response->assertNotFound();
+    });
+
+    test('logged-in customer does not need guest_name', function () {
+        $response = $this->actingAs($this->customer)
+            ->postJson('/api/orders', [
+                'branch_id' => $this->branch->id,
+                'payment_method' => 'cash',
+                'items' => [
+                    ['menu_item_id' => $this->menu1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.user_id', $this->customer->id);
+
+        $order = Order::first();
+        expect($order->user_id)->toBe($this->customer->id)
+            ->and($order->guest_name)->toBeNull();
     });
 });
 

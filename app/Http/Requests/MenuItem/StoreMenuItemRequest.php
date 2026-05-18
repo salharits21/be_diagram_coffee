@@ -19,7 +19,7 @@ class StoreMenuItemRequest extends FormRequest
             'name' => ['required', 'string', 'max:100', Rule::unique('menu_items','name')->whereNull('deleted_at')],
             'description' => ['nullable', 'string'],
             'base_price' => ['required', 'numeric', 'min:1'],
-            'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }

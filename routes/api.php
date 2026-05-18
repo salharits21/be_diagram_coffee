@@ -12,6 +12,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\XenditWebhookController;
 use App\Http\Controllers\BranchMenuController;
+use App\Http\Controllers\BannerController;
 
 // Public Routes (Tidak perlu login)
 Route::post('/register', [AuthController::class, 'register']);
@@ -30,6 +31,9 @@ Route::get('/branches/{branch}/menus', [BranchMenuController::class, 'index']);
 Route::get('/branches/{branch}/menus/{menuItem}', [BranchMenuController::class, 'show']);
 Route::post('/orders', [OrderController::class, 'store']);
 Route::get('/orders/status/{orderNumber}', [OrderController::class, 'guestStatus']);
+
+// Public: Banner promo
+Route::get('/banners', [BannerController::class, 'index']);
 
 // Xendit Webhook (public, tapi diverifikasi oleh token)
 Route::post('/webhooks/xendit', [XenditWebhookController::class, 'handle']);
@@ -84,6 +88,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/admins', [AdminController::class, 'store']);
         Route::put('/admin/admins/{admin}', [AdminController::class, 'update']);
         Route::delete('/admin/admins/{admin}', [AdminController::class, 'destroy']);
+
+        // Manajemen Banner Promo
+        Route::get('/admin/banners', [BannerController::class, 'all']);
+        Route::post('/admin/banners', [BannerController::class, 'store']);
+        Route::put('/admin/banners/{banner}', [BannerController::class, 'update']);
+        Route::delete('/admin/banners/{banner}', [BannerController::class, 'destroy']);
     });
 
     // ==========================================

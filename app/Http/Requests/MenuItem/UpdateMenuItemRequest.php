@@ -20,7 +20,7 @@ class UpdateMenuItemRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:100', Rule::unique('menu_items','name')->whereNull('deleted_at')->ignore($menuItem->id)],
             'description' => ['nullable', 'string'],
             'base_price' => ['sometimes', 'numeric', 'min:1'],
-            'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'image_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
             'is_active' => ['sometimes', 'boolean'],
         ];
     }
