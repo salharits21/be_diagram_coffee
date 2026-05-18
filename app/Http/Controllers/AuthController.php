@@ -187,4 +187,21 @@ class AuthController extends Controller
             'message' => 'Token tidak valid atau sudah kedaluwarsa',
         ], 422);
     }
+
+    // Edit Profil (hanya nama)
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $user = $request->user();
+        $user->update(['name' => $request->name]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui',
+            'data' => $user,
+        ]);
+    }
 }

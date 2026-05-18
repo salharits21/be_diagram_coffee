@@ -61,6 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
     });
 
+    // Edit profil (hanya nama)
+    Route::put('/user/profile', [AuthController::class, 'updateProfile']);
+
     // ==========================================
     // Customer Order Routes
     // ==========================================
