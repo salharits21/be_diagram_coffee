@@ -28,6 +28,23 @@ class AdminController extends Controller
     }
 
     /**
+     * Menampilkan daftar admin berdasarkan cabang (branch_id).
+     */
+    public function getByBranch(int $branchId)
+    {
+        $admins = User::where('role', 'admin')
+            ->where('branch_id', $branchId)
+            ->orderBy('name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar admin untuk cabang tersebut berhasil diambil',
+            'data' => $admins,
+        ]);
+    }
+
+    /**
      * Menampilkan detail admin.
      */
     public function show(int $admin)

@@ -108,6 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/admin/admins', [AdminController::class, 'store']);
         Route::put('/admin/admins/{admin}', [AdminController::class, 'update']);
         Route::delete('/admin/admins/{admin}', [AdminController::class, 'destroy']);
+        Route::get('/admin/branches/{branch}/admins', [AdminController::class, 'getByBranch']);
 
         // Manajemen Banner Promo
         Route::get('/admin/banners', [BannerController::class, 'all']);
