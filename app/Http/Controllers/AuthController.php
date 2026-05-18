@@ -92,11 +92,7 @@ class AuthController extends Controller
 
         $user->markEmailAsVerified();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Email berhasil diverifikasi',
-            redirect()->away(env('FRONT_END_URL') . '/login'),
-        ]);
+        return redirect()->away(env('FRONTEND_URL') . '/login');
     }
 
     // Kirim Ulang Email Verifikasi
