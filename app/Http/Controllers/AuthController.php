@@ -26,13 +26,13 @@ class AuthController extends Controller
         ]);
 
         // Kirim email verifikasi
-        event(new Registered($user));
+        // event(new Registered($user));
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'success' => true,
-            'message' => 'Registrasi berhasil. Silakan cek email untuk verifikasi.',
+            'message' => 'Registrasi berhasil. Silakan login dengan Bearer token.',
             'data' => [
                 'user' => $user,
                 'access_token' => $token,
@@ -44,35 +44,53 @@ class AuthController extends Controller
     // Fitur Login
     public function login(LoginRequest $request)
     {
-        $remember = $request->boolean('remember_me');
+        // $remember = $request->boolean('remember_me');
 
-        if ($remember) {
-            Auth::guard('web')->setRememberDuration(config('auth.remember', 20160)); // 14 hari
-        }
+        // if ($remember) {
+        //     Auth::guard('web')->setRememberDuration(config('auth.remember', 20160)); // 14 hari
+        // }
 
-        if (Auth::attempt($request->only('email', 'password'), $remember)) {
-            $request->session()->regenerate(); // Mencegah Session Fixation
+        // if (Auth::attempt($request->only('email', 'password'), $remember)) {
+        //     $request->session()->regenerate(); // Mencegah Session Fixation
 
+        //     return response()->json([
+        //         'success' => true,
+        //         'message' => 'Login berhasil',
+        //         'data' => Auth::user()
+        //     ], 200);
+        // }
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'success' => true,
-                'message' => 'Login berhasil',
-                'data' => Auth::user()
-            ], 200);
+                'success' => false,
+                'message' => 'Email atau password salah'
+            ], 401);
         }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => false,
-            'message' => 'Email atau password salah'
-        ], 401);
+            'success' => true,
+            'message' => 'Login berhasil',
+            'data' => [
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer'
+            ]
+        ], 200);
     }
 
     // Fitur Logout
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-        
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        // Auth::guard('web')->logout();
+        // 
+        // $request->session()->invalidate();
+        // $request->session()->regenerateToken();
+
+        $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'success' => true,

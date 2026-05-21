@@ -1,7 +1,7 @@
 # Diagram Coffee Backend — API Documentation
 
 > **Base URL:** `http://localhost:8000/api`
-> **Auth Method:** Laravel Sanctum (Session-based / Bearer Token)
+> **Auth Method:** Laravel Sanctum (Bearer Token)
 
 ---
 
@@ -41,7 +41,7 @@
 
 ### `POST /register` 🌐
 
-Registrasi akun customer baru. Mengirim email verifikasi otomatis.
+Registrasi akun customer baru.
 
 **Body:**
 ```json
@@ -59,7 +59,7 @@ Registrasi akun customer baru. Mengirim email verifikasi otomatis.
 ```json
 {
   "success": true,
-  "message": "Registrasi berhasil. Silakan cek email untuk verifikasi.",
+  "message": "Registrasi berhasil. Silakan login dengan Bearer token.",
   "data": {
     "user": { ... },
     "access_token": "1|abc...",
@@ -72,14 +72,13 @@ Registrasi akun customer baru. Mengirim email verifikasi otomatis.
 
 ### `POST /login` 🌐
 
-Login menggunakan email dan password (session-based).
+Login menggunakan email dan password. Mengembalikan Bearer token.
 
 **Body:**
 ```json
 {
   "email": "string, required",
-  "password": "string, required",
-  "remember_me": "boolean, optional"
+  "password": "string, required"
 }
 ```
 
@@ -88,7 +87,11 @@ Login menggunakan email dan password (session-based).
 {
   "success": true,
   "message": "Login berhasil",
-  "data": { "id": 1, "name": "...", "email": "...", "role": "customer", ... }
+  "data": {
+    "user": { "id": 1, "name": "...", "email": "...", "role": "customer", ... },
+    "access_token": "1|abc...",
+    "token_type": "Bearer"
+  }
 }
 ```
 
@@ -101,9 +104,9 @@ Login menggunakan email dan password (session-based).
 
 ### `POST /logout` 👤🔧👑
 
-Logout dan hapus sesi.
+Logout dan revoke access token.
 
-**Headers:** `Cookie: laravel_session=...`
+**Headers:** `Authorization: Bearer {access_token}`
 
 **Response `200`:**
 ```json
